@@ -1,0 +1,4 @@
+venv/
+Flowerista/venv/
+__pycache__/
+*.pyc
