@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Own Flower - Flowerista</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <style>
+    .canvas-container { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    #flowerCanvas { background: white; border: 3px dashed var(--primary-pink); border-radius: 16px; cursor: crosshair; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .controls { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; align-items: center; background: white; padding: 1rem 1.5rem; border-radius: 16px; border: 2px solid var(--soft-pink); }
+    .tool-btn { padding: 0.5rem 1rem; border-radius: 20px; border: 2px solid var(--soft-pink); background: white; cursor: pointer; font-weight: bold; }
+    .tool-btn.active { background: var(--soft-pink); color: var(--primary-pink); }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="{% url 'home' %}" class="logo">🌸 Flowerista</a>
+    <nav>
+      <a href="{% url 'home' %}">Home</a>
+      <a href="/custom-flower/">Create Your Flower 🎨</a>
+      <a href="{% url 'cart' %}">Cart 🛒</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <h1 style="color: var(--primary-pink);">Design Your Custom Flower 🎨</h1>
+      <p style="color: #666;">Draw your dream flower stem or pattern, pick your colors, and our artisans will hand-craft it for you!</p>
+    </div>
+
+    <div class="canvas-container">
+      <div class="controls">
+        <label>Petal Color: <input type="color" id="colorPicker" value="#E8839B"></label>
+        <label>Brush Size: <input type="range" id="brushSize" min="2" max="30" value="8"></label>
+        <button class="tool-btn" id="clearBtn">Clear Canvas 🗑️</button>
+      </div>
+
+      <canvas id="flowerCanvas" width="600" height="400"></canvas>
+
+      <div style="display: flex; gap: 1rem;">
+        <button class="btn-primary btn-yellow" onclick="saveCanvas()">Submit Custom Design ✨</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('flowerCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const brushSize = document.getElementById('brushSize');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let isDrawing = false;
+
+    // Canvas background
+    ctx.fillStyle = '#FAF6F0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    function startDrawing(e) {
+      isDrawing = true;
+      draw(e);
+    }
+
+    function stopDrawing() {
+      isDrawing = false;
+      ctx.beginPath();
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = colorPicker.value;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseleave', stopDrawing);
+
+    clearBtn.addEventListener('click', () => {
+      ctx.fillStyle = '#FAF6F0';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+
+    function saveCanvas() {
+      alert("✨ Your custom flower design has been saved and attached to your order!");
+    }
+  </script>
+</body>
+</html>

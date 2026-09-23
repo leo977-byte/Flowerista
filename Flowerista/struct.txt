@@ -1,0 +1,22 @@
+flowerista_project/
+├── db.sqlite3                  <-- Generated automatically after migration
+├── manage.py
+├── flowerista_project/
+│   ├── __init__.py
+│   ├── settings.py             <-- Contains TEMPLATES & STATICFILES settings
+│   ├── urls.py
+│   └── wsgi.py
+└── store/                      <-- Your Django app
+    ├── models.py               <-- Database schema (Product, Variant, Cart, User)
+    ├── views.py                <-- Controller logic (Home, Product Detail, Cart, Auth)
+    ├── urls.py                 <-- Routing endpoints
+    ├── admin.py                <-- Admin dashboard registration
+    ├── static/
+    │   └── css/
+    │       └── style.css       <-- Dynamic CSS theme variables
+    └── templates/
+        ├── home.html           <-- Product showcase grid
+        ├── product_detail.html <-- Dynamic color picker & specs
+        ├── cart.html           <-- Shopping bag table
+        ├── login.html          <-- Authentication
+        └── signup.html         <-- Account creation

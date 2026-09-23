@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ product.name|default:"Product Details" }} - Flowerista</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <style>
+    .option-group { margin-bottom: 1.2rem; }
+    .option-group label { display: block; font-weight: bold; margin-bottom: 0.4rem; color: var(--text-dark); }
+    .option-select { width: 100%; padding: 0.6rem 1rem; border-radius: 12px; border: 2px solid var(--soft-pink); background: white; font-size: 0.95rem; outline: none; }
+    .option-select:focus { border-color: var(--accent-flower); }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="{% url 'home' %}" class="logo">🌸 Flowerista</a>
+    <nav>
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'create_flower' %}">Create Your Flower 🎨</a>
+      <a href="{% url 'cart' %}">Cart 🛒</a>
+      {% if user.is_authenticated %}
+        <span style="font-weight: 600;">Hi, {{ user.username }}!</span>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="detail-wrapper">
+      <div>
+        <img src="{{ product.image_url|default:'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=500' }}" alt="{{ product.name }}" style="width: 100%; border-radius: 16px;">
+      </div>
+      <div>
+        <h1 style="color: var(--accent-flower); transition: color 0.3s;">{{ product.name|default:"Handmade Lilies Bouquet" }}</h1>
+        <p class="price" id="display-price">${{ product.base_price|default:"24.99" }}</p>
+        <p>{{ product.description|default:"Handcrafted cotton yarn bouquet designed to last forever." }}</p>
+
+        <hr style="border: none; border-top: 1px solid var(--soft-pink); margin: 1.2rem 0;">
+
+        <!-- Form wraps all selections so submitting triggers POST to cart -->
+        <form method="POST" action="{% if product.slug %}{% url 'product_detail' product.slug %}{% else %}{% url 'product_detail' 'lilies' %}{% endif %}">
+          {% csrf_token %}
+
+          <!-- Color Palette Selection -->
+          <div class="option-group">
+            <label>Flower Color Palette:</label>
+            <div class="color-swatch-group">
+              {% for variant in variants %}
+                <div class="color-swatch {% if forloop.first %}active{% endif %}" 
+                     data-hex="{{ variant.color_hex }}" 
+                     title="{{ variant.color_name }}"></div>
+              {% empty %}
+                <div class="color-swatch active" data-hex="#E8839B" title="Blossom Pink"></div>
+                <div class="color-swatch" data-hex="#F4C430" title="Marigold Yellow"></div>
+                <div class="color-swatch" data-hex="#A0C4FF" title="Hydrangea Blue"></div>
+                <div class="color-swatch" data-hex="#B9FBC0" title="Sage Green"></div>
+                <div class="color-swatch" data-hex="#D8B4F8" title="Lavender Violet"></div>
+              {% endfor %}
+            </div>
+            <!-- Hidden input to send selected color in form submission -->
+            <input type="hidden" name="color" id="selected-color" value="#E8839B">
+          </div>
+
+          <!-- Bouquet Size -->
+          <div class="option-group">
+            <label for="bouquet-size">Bouquet Size:</label>
+            <select id="bouquet-size" name="size" class="option-select">
+              <option value="small">Small (3 Stem Blooms) - Standard</option>
+              <option value="medium">Medium (6 Stem Blooms) + $12.00</option>
+              <option value="grand">Grand Deluxe (12 Stem Blooms) + $24.00</option>
+            </select>
+          </div>
+
+          <!-- Packaging Style -->
+          <div class="option-group">
+            <label for="packaging">Packaging Style & Wrap Color:</label>
+            <select id="packaging" name="packaging" class="option-select">
+              <option value="cream">Soft Cream Craft Paper & Ribbon</option>
+              <option value="pink">Blush Pink Satin Wrap</option>
+              <option value="lavender">Pastel Lavender Tissue Wrap</option>
+              <option value="clear">Minimalist Clear Glass Flower Pot</option>
+            </select>
+          </div>
+
+          <!-- Material -->
+          <div class="option-group">
+            <label for="material">Yarn Craft Material:</label>
+            <select id="material" name="material" class="option-select">
+              <option value="crochet">100% Egyptian Soft Cotton Yarn (Crochet)</option>
+              <option value="felt">Soft Merino Wool Felt</option>
+              <option value="velvet">Plush Velvet Yarn (+ $5.00)</option>
+            </select>
+          </div>
+
+          <!-- Shipping Speed -->
+          <div class="option-group">
+            <label for="shipping">Shipping Delivery Speed:</label>
+            <select id="shipping" name="shipping" class="option-select">
+              <option value="standard">Standard Artisan Handcrafting (3-5 Days)</option>
+              <option value="express">Express Priority Rush (1-2 Days) + $8.00</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary btn-yellow" style="margin-top: 1rem; width: 100%; font-size: 1.1rem; cursor: pointer;">
+            Add Custom Bouquet to Cart 🛒
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const swatches = document.querySelectorAll('.color-swatch');
+      const selectedColorInput = document.getElementById('selected-color');
+
+      swatches.forEach(swatch => {
+        const hex = swatch.getAttribute('data-hex');
+        if (hex) swatch.style.backgroundColor = hex;
+
+        swatch.addEventListener('click', function() {
+          // Dynamic CSS color change
+          document.documentElement.style.setProperty('--accent-flower', hex);
+          swatches.forEach(s => s.classList.remove('active'));
+          this.classList.add('active');
+          if (selectedColorInput) selectedColorInput.value = hex;
+        });
+      });
+    });
+  </script>
+</body>
+</html>

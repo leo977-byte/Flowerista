@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart - Flowerista</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header>
+    <a href="{% url 'home' %}" class="logo">🌸 Flowerista</a>
+    <nav>
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'create_flower' %}">Create Your Flower 🎨</a>
+      <a href="{% url 'cart' %}">Cart 🛒</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Your Shopping Basket 🧺</h2>
+    <br>
+    <table class="cart-table">
+      <thead>
+        <tr>
+          <th>Handmade Item</th>
+          <th>Color</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="cart-body">
+        {% for item in cart.items.all %}
+        <tr>
+          <td>{{ item.variant.product.name }}</td>
+          <td>{{ item.variant.color_name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>${{ item.get_total_price }}</td>
+          <td>
+            <form method="POST" action="{% url 'cart' %}" style="margin: 0;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove">
+              <input type="hidden" name="item_id" value="{{ item.id }}">
+              <button type="submit" style="background: none; border: none; color: #e63946; cursor: pointer; font-weight: bold;">
+                Remove 🗑️
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <!-- Sample Interactive Rows with JS Removal if DB is empty -->
+        <tr class="sample-row">
+          <td>Handmade Lilies Bouquet</td>
+          <td>Blossom Pink</td>
+          <td>1</td>
+          <td>$24.99</td>
+          <td>
+            <button type="button" onclick="removeSampleRow(this)" style="background: none; border: none; color: #e63946; cursor: pointer; font-weight: bold;">
+              Remove 🗑️
+            </button>
+          </td>
+        </tr>
+        <tr class="sample-row">
+          <td>Papatya (Daisy) Pot</td>
+          <td>Marigold Yellow</td>
+          <td>2</td>
+          <td>$29.98</td>
+          <td>
+            <button type="button" onclick="removeSampleRow(this)" style="background: none; border: none; color: #e63946; cursor: pointer; font-weight: bold;">
+              Remove 🗑️
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div style="text-align: right; margin-top: 2rem;">
+      <h3>Total: <span id="cart-total" style="color: var(--primary-pink);">$54.97</span></h3>
+      <br>
+      <!-- Direct Working Link to Checkout Page -->
+      <a href="{% url 'checkout' %}" class="btn-primary btn-yellow" style="text-decoration: none; display: inline-block; cursor: pointer;">
+        Proceed to Checkout ✨
+      </a>
+    </div>
+  </main>
+
+  <script>
+    // Handles dynamic removing of sample rows when testing without database items
+    function removeSampleRow(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+      
+      const remainingRows = document.querySelectorAll('.sample-row');
+      if (remainingRows.length === 0) {
+        document.getElementById('cart-total').innerText = "$0.00";
+        document.getElementById('cart-body').innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: #777;">
+              Your basket is empty! 🌸
+            </td>
+          </tr>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Flowerista</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    #map { height: 280px; width: 100%; border-radius: 12px; border: 2px solid var(--soft-pink); margin-top: 0.5rem; }
+    @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="{% url 'home' %}" class="logo">🌸 Flowerista</a>
+    <nav>
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'cart' %}">Cart 🛒</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h2>Checkout & Delivery Address 🚚</h2>
+    <br>
+    <div class="checkout-grid">
+      <!-- Shipping Info Form -->
+      <div style="background: white; padding: 2rem; border-radius: var(--radius); border: 2px solid var(--soft-pink);">
+        <h3 style="color: var(--primary-pink); margin-bottom: 1rem;">Customer Information</h3>
+        <form action="#" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="fullname">Full Name</label>
+            <input type="text" id="fullname" required placeholder="Nour Sabry">
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" required placeholder="nour@example.com">
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number (Egypt +20)</label>
+            <input type="tel" id="phone" required placeholder="01012345678">
+          </div>
+          <div class="form-group">
+            <label for="governorate">Governorate</label>
+            <select id="governorate" class="form-group" style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 2px solid var(--soft-pink);">
+              <option value="cairo">Cairo</option>
+              <option value="giza">Giza</option>
+              <option value="alexandria">Alexandria</option>
+              <option value="sharqia">Sharqia</option>
+              <option value="dakahlia">Dakahlia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="street">Street Name & Building / Apartment No.</label>
+            <input type="text" id="street" required placeholder="12 El-Tahrir Street, Apt 4">
+          </div>
+          <button type="submit" class="btn-primary btn-yellow" style="width: 100%; margin-top: 1rem;">Confirm & Place Order ✨</button>
+        </form>
+      </div>
+
+      <!-- Interactive Map & Summary -->
+      <div>
+        <div style="background: white; padding: 1.5rem; border-radius: var(--radius); border: 2px solid var(--soft-pink);">
+          <h3 style="color: var(--primary-pink);">Delivery Location Pin</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Click anywhere on the map to mark your exact delivery address in Egypt:</p>
+          <div id="map"></div>
+          <p id="location-coords" style="font-size: 0.85rem; color: var(--primary-pink); margin-top: 0.5rem; font-weight: bold;">Selected Coordinates: Cairo, Egypt (29.98, 31.28)</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Center map over Cairo, Egypt
+    const map = L.map('map').setView([29.9869, 31.2899], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker = L.marker([29.9869, 31.2899], {draggable: true}).addTo(map)
+      .bindPopup('🌸 Flowerista Delivery Point')
+      .openPopup();
+
+    function updateCoords(lat, lng) {
+      document.getElementById('location-coords').innerText = `Selected Location: Lat ${lat.toFixed(4)}, Lng ${lng.toFixed(4)}`;
+    }
+
+    map.on('click', function(e) {
+      const { lat, lng } = e.latlng;
+      marker.setLatLng([lat, lng]);
+      updateCoords(lat, lng);
+    });
+
+    marker.on('dragend', function(e) {
+      const position = marker.getLatLng();
+      updateCoords(position.lat, position.lng);
+    });
+  </script>
+</body>
+</html>
